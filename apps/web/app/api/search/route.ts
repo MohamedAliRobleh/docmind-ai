@@ -38,11 +38,12 @@ export async function GET(request: NextRequest) {
       .map(doc => {
         const inName = doc.name.toLowerCase().includes(qLower)
         const inContent = doc.content.toLowerCase().includes(qLower)
+        const matchType: SearchResult['matchType'] = inName && inContent ? 'both' : inName ? 'name' : 'content'
         return {
           id: doc.id,
           name: doc.name,
           created_at: doc.created_at,
-          matchType: inName && inContent ? 'both' : inName ? 'name' : 'content',
+          matchType,
           snippet: inContent ? getSnippet(doc.content, q) : undefined,
         }
       })
@@ -68,11 +69,12 @@ export async function GET(request: NextRequest) {
   const results: SearchResult[] = data.map(doc => {
     const inName = doc.name.toLowerCase().includes(qLower)
     const inContent = doc.content.toLowerCase().includes(qLower)
+    const matchType: SearchResult['matchType'] = inName && inContent ? 'both' : inName ? 'name' : 'content'
     return {
       id: doc.id,
       name: doc.name,
       created_at: doc.created_at,
-      matchType: inName && inContent ? 'both' : inName ? 'name' : 'content',
+      matchType,
       snippet: inContent ? getSnippet(doc.content, q) : undefined,
     }
   })
