@@ -1,6 +1,12 @@
 import Groq from 'groq-sdk'
 
-const client = new Groq({ apiKey: process.env.GROQ_API_KEY })
+let _client: Groq | null = null
+function getClient(): Groq {
+  if (!_client) {
+    _client = new Groq({ apiKey: process.env.GROQ_API_KEY })
+  }
+  return _client
+}
 
 // Truncate content to avoid token limits — increased to 14k chars
 function truncate(text: string, maxChars = 14000) {
@@ -25,7 +31,7 @@ Use markdown formatting when helpful (bullet points, bold for key terms).
 Document: ${doc}
 Question: ${question}`
 
-  const groqStream = await client.chat.completions.create({
+  const groqStream = await getClient().chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     messages: [{ role: 'user', content: prompt }],
     max_tokens: 2048,
@@ -139,7 +145,7 @@ Document: ${truncate(content, 8000)}
 Question: ${question}`
     : prompts[task]
 
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     messages: [{ role: 'user', content: prompt }],
     max_tokens: task === 'extract' ? 1024 : task === 'chat' ? 2048 : 4096,

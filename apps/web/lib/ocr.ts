@@ -1,6 +1,12 @@
 import Groq from 'groq-sdk'
 
-const client = new Groq({ apiKey: process.env.GROQ_API_KEY })
+let _client: Groq | null = null
+function getClient(): Groq {
+  if (!_client) {
+    _client = new Groq({ apiKey: process.env.GROQ_API_KEY })
+  }
+  return _client
+}
 
 // Groq vision supported formats
 const VISION_SUPPORTED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -16,7 +22,7 @@ export async function extractTextFromImage(buffer: Buffer, mimeType: string): Pr
   const base64 = buffer.toString('base64')
   const dataUrl = `data:${normalizedMime};base64,${base64}`
 
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'llama-3.2-11b-vision-preview',
     messages: [
       {
