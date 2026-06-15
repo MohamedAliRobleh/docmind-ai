@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase, getUser } from '@/lib/supabase-server'
 import { docs } from '@/lib/store'
-import { PLAN_LIMITS } from '@/app/api/user/plan/route'
+import { PLAN_LIMITS } from '@/lib/plans'
 import { extractTextFromImage } from '@/lib/ocr'
 
 const IS_DEMO = !process.env.NEXT_PUBLIC_SUPABASE_URL ||

@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabase, getUser } from '@/lib/supabase-server'
 import { docs } from '@/lib/store'
+import { PLAN_LIMITS } from '@/lib/plans'
 
 const IS_DEMO = !process.env.NEXT_PUBLIC_SUPABASE_URL ||
   process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-
-export const PLAN_LIMITS: Record<string, number> = {
-  free: 3,
-  pro: 50,
-  business: Infinity,
-}
 
 export async function GET() {
   if (IS_DEMO) {
