@@ -1,9 +1,11 @@
-import Groq from 'groq-sdk'
+import Anthropic from '@anthropic-ai/sdk'
 
-let _client: Groq | null = null
-function getClient(): Groq {
+const MODEL = 'claude-opus-4-8'
+
+let _client: Anthropic | null = null
+function getClient(): Anthropic {
   if (!_client) {
-    _client = new Groq({ apiKey: process.env.GROQ_API_KEY })
+    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   }
   return _client
 }
@@ -31,22 +33,23 @@ Use markdown formatting when helpful (bullet points, bold for key terms).
 Document: ${doc}
 Question: ${question}`
 
-  const groqStream = await getClient().chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [{ role: 'user', content: prompt }],
+  const anthropicStream = getClient().messages.stream({
+    model: MODEL,
     max_tokens: 2048,
-    temperature: 0.4,
-    stream: true,
+    messages: [{ role: 'user', content: prompt }],
   })
 
   const encoder = new TextEncoder()
   return new ReadableStream<Uint8Array>({
-    async start(controller) {
-      for await (const chunk of groqStream) {
-        const text = chunk.choices[0]?.delta?.content || ''
+    start(controller) {
+      anthropicStream.on('text', (text) => {
         if (text) controller.enqueue(encoder.encode(text))
-      }
-      controller.close()
+      })
+      anthropicStream.on('end', () => controller.close())
+      anthropicStream.on('error', (err) => controller.error(err))
+    },
+    cancel() {
+      anthropicStream.abort()
     },
   })
 }
@@ -145,14 +148,15 @@ Document: ${truncate(content, 8000)}
 Question: ${question}`
     : prompts[task]
 
-  const response = await getClient().chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [{ role: 'user', content: prompt }],
+  const response = await getClient().messages.create({
+    model: MODEL,
     max_tokens: task === 'extract' ? 1024 : task === 'chat' ? 2048 : 4096,
-    temperature: task === 'extract' ? 0 : 0.4,
+    messages: [{ role: 'user', content: prompt }],
   })
 
-  const raw = response.choices[0].message.content || ''
-  // DeepSeek R1 includes <think>...</think> reasoning blocks — strip them from the final output
-  return raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim()
+  const raw = response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+    .map((block) => block.text)
+    .join('')
+  return raw.trim()
 }

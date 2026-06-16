@@ -1,36 +1,43 @@
-import Groq from 'groq-sdk'
+import Anthropic from '@anthropic-ai/sdk'
 
-let _client: Groq | null = null
-function getClient(): Groq {
+const MODEL = 'claude-opus-4-8'
+
+let _client: Anthropic | null = null
+function getClient(): Anthropic {
   if (!_client) {
-    _client = new Groq({ apiKey: process.env.GROQ_API_KEY })
+    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   }
   return _client
 }
 
-// Groq vision supported formats
-const VISION_SUPPORTED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+// Claude vision supported formats
+const VISION_SUPPORTED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const
+type SupportedMime = (typeof VISION_SUPPORTED)[number]
 
 export async function extractTextFromImage(buffer: Buffer, mimeType: string): Promise<string> {
   // Normalize JPEG mime type
   const normalizedMime = mimeType === 'image/jpg' ? 'image/jpeg' : mimeType
 
-  if (!VISION_SUPPORTED.includes(normalizedMime)) {
+  if (!VISION_SUPPORTED.includes(normalizedMime as SupportedMime)) {
     throw new Error(`Format image non supporté pour l'OCR : ${mimeType}. Utilisez JPG, PNG, WEBP ou GIF.`)
   }
 
   const base64 = buffer.toString('base64')
-  const dataUrl = `data:${normalizedMime};base64,${base64}`
 
-  const response = await getClient().chat.completions.create({
-    model: 'llama-3.2-11b-vision-preview',
+  const response = await getClient().messages.create({
+    model: MODEL,
+    max_tokens: 4096,
     messages: [
       {
         role: 'user',
         content: [
           {
-            type: 'image_url',
-            image_url: { url: dataUrl },
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: normalizedMime as SupportedMime,
+              data: base64,
+            },
           },
           {
             type: 'text',
@@ -42,10 +49,13 @@ If the document is in French, return the text in French. If English, return in E
         ],
       },
     ],
-    max_tokens: 4096,
   })
 
-  const text = response.choices[0].message.content || ''
+  const text = response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+    .map((block) => block.text)
+    .join('')
+
   if (!text.trim()) throw new Error('Aucun texte détecté dans cette image.')
   return text
 }
