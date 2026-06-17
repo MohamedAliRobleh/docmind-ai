@@ -8,7 +8,7 @@ const sections = [
   },
   {
     title: '2. How We Use Your Data',
-    content: `Your data is used solely to provide DocuMind AI services: document analysis, summary and report generation. We never sell your data to third parties. Your documents are processed by the Groq/LLaMA API and are not retained after processing.`,
+    content: `Your data is used solely to provide DocuMind AI services: document analysis, summary and report generation. We never sell your data to third parties. Your documents are processed by the Anthropic (Claude) API and are not retained after processing.`,
   },
   {
     title: '3. Uploaded Documents',
@@ -16,7 +16,7 @@ const sections = [
   },
   {
     title: '4. Data Sharing',
-    content: `We only share your data with essential service providers: Groq (AI analysis), Supabase (secure storage), and Stripe (payment processing). These providers are bound by their own privacy policies compliant with PIPEDA and GDPR.`,
+    content: `We only share your data with essential service providers: Anthropic (AI analysis), Supabase (secure storage), and Stripe (payment processing). These providers are bound by their own privacy policies compliant with PIPEDA and GDPR.`,
   },
   {
     title: '5. Security',

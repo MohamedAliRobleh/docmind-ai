@@ -111,7 +111,7 @@ export default function Home() {
         <div className="relative max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple/40 bg-purple/5 text-sm text-secondary mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            Propulsé par Groq · llama-3.3-70b
+            Propulsé par Anthropic · Claude Haiku 4.5
           </div>
 
           <h1 className="font-syne text-5xl md:text-7xl font-800 leading-[1.05] tracking-tight mb-6">
@@ -363,7 +363,7 @@ export default function Home() {
           </div>
           <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted">
             <span>© {new Date().getFullYear()} DocuMind AI. Tous droits réservés.</span>
-            <span>Construit avec Next.js · Groq AI · Supabase · Stripe</span>
+            <span>Construit avec Next.js · Anthropic Claude · Supabase · Stripe</span>
           </div>
         </div>
       </footer>
